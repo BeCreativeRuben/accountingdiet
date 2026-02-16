@@ -1,32 +1,7 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "functions": {
-    "server.js": {
-      "includeFiles": "**/*.{css,js,html}"
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "server.js"
-    },
-    {
-      "src": "/uploads/(.*)",
-      "dest": "server.js"
-    },
-    {
-      "src": "/login",
-      "dest": "server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "server.js"
-    }
-  ]
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["iad1"]
 }
