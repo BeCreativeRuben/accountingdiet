@@ -1,5 +1,7 @@
+'use client';
+
+import { SidebarProvider } from '@/lib/SidebarContext';
 import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
 
 export default function DashboardLayout({
   children,
@@ -7,11 +9,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="app-container">
-      <Sidebar />
-      <main className="main-content">
-        {children}
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="app-container">
+        <Sidebar />
+        <main className="main-content">
+          {children}
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }

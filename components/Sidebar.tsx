@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSidebar } from '@/lib/SidebarContext';
 
 interface NavItem {
   page: string;
@@ -21,9 +22,18 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const currentPage = pathname?.split('/')[1] || 'dashboard';
+  const { sidebarOpen, setSidebarOpen } = useSidebar();
 
   return (
-    <nav className="sidebar">
+    <>
+      {sidebarOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
         <h2>
           <i className="fas fa-chart-line"></i> Diëtist Noor
@@ -37,6 +47,7 @@ export default function Sidebar() {
               <Link
                 href={`/${item.page}`}
                 className={`nav-item ${isActive ? 'active' : ''}`}
+                onClick={() => setSidebarOpen(false)}
               >
                 <i className={item.icon}></i>
                 <span>{item.label}</span>
@@ -55,5 +66,6 @@ export default function Sidebar() {
         </div>
       </div>
     </nav>
+    </>
   );
 }

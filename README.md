@@ -1,77 +1,38 @@
-# Boekhoudsysteem voor diëtisten
+# Diëtist Noor – Boekhoudsysteem
 
-Een web-gebaseerd boekhoudsysteem voor diëtisten: klanten, afspraken, uitgaven en dashboard. Geschikt voor **meerdere gebruikers**: elke gebruiker (tenant) heeft een eigen, afgeschermde dataset.
+Een eenvoudig boekhoudsysteem voor de diëtistenpraktijk. Je beheert klanten, afspraken en uitgaven op één plek en houdt zicht op terugbetalingen via de mutualiteit.
 
-## Functionaliteiten
+---
 
-- **Klantenbeheer**: Toevoegen, bewerken en beheren van klantgegevens
-- **Afsprakenplanning**: Inplannen en beheren van consultaties met PDF-upload
-- **Uitgavenregistratie**: Bijhouden van bedrijfskosten per categorie
-- **Dashboard**: Overzicht van inkomsten, uitgaven en statistieken
-- **Verzekeringsmonitoring**: Tracking van sessies per verzekering
-- **Instellingen**: Beheer van consulttypes, verzekeringen en categorieën
-- **PDF-documenten**: Upload en download van PDF’s bij afspraken (Supabase Storage)
-- **Authenticatie**: Inloggen en registreren via e-mail/wachtwoord (Supabase Auth)
+## Wat kun je ermee?
 
-## Twee manieren om te draaien
+**Inloggen**  
+Je opent de website en logt in met een persoonlijke toegangscode. Alleen met die code krijg je toegang tot je gegevens.
 
-### 1. Cloud (aanbevolen): Vercel + Supabase
+**Dashboard**  
+Op het startscherm zie je in één oogopslag de inkomsten, uitgaven en het nettoresultaat van de huidige maand. Daaronder een grafiek en tabel met het maandoverzicht van het jaar: per maand de inkomsten, uitgaven en het netto. Zo houd je het jaarverloop goed in de gaten.
 
-- **Multi-tenant**: Elke nieuwe gebruiker krijgt een eigen account en eigen data.
-- **Geen server beheren**: Deploy op Vercel; database en bestanden in Supabase.
-- Zie **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** voor stappen: Supabase-project, migratie, Storage-bucket en Vercel environment variables.
+**Klanten**  
+Je bewaart je cliënten: naam, contactgegevens, startdatum en mutualiteit. Je kunt klanten toevoegen, gegevens aanpassen en verwijderen.
 
-### 2. Lokaal (ontwikkeling)
+**Afspraken**  
+Je registreert consulten: datum, welke klant, welk type consult (intake, opvolgconsult, duo, online, enz.) en of de sessie terugbetaalbaar is. Optioneel voeg je een opmerking of PDF toe. De standaard consulttypes (duur en prijs) staan al in het systeem; je kunt ze in Instellingen beheren.
 
-**Vereisten:** Node.js 16+, een Supabase-project (gratis tier kan).
+**Uitgaven**  
+Je voert bedrijfskosten in: datum, beschrijving, bedrag en betaalmethode. Je kunt categorieën aanmaken in Instellingen om uitgaven te groeperen.
 
-1. Clone of download het project.
-2. Maak een Supabase-project op [supabase.com](https://supabase.com), voer de SQL uit uit `supabase/migrations/20240204000001_initial_schema.sql`, en maak een Storage-bucket `afspraak-pdfs`.
-3. Maak in de projectmap een `.env`-bestand (niet committen):
-   ```
-   SUPABASE_URL=https://jouw-project.supabase.co
-   SUPABASE_ANON_KEY=eyJ...
-   SUPABASE_SERVICE_ROLE_KEY=eyJ...
-   ```
-4. Installeer en start:
-   ```bash
-   npm install
-   npm start
-   ```
-5. Open `http://localhost:3000` → loginpagina. Klik op **Registreren** om een account aan te maken; je krijgt dan automatisch een eigen tenant met standaard instellingen.
+**Terugbetaling**  
+Het systeem toont per klant met mutualiteit een overzicht van terugbetaalbare sessies en een korte melding (bijv. hoeveel tegemoetkoming en hoeveel sessies nog resteren dat jaar). De regels sluiten aan bij de meest voorkomende mutualiteiten (o.a. CM, LM, Solidaris, Helan, VNZ).
 
-## Demo-versie (zonder backend)
+**Instellingen**  
+Hier beheer je consulttypes (naam, duur, prijs) en categorieën voor uitgaven. De lijst mutualiteiten is vast; je kiest bij elke klant de juiste mutualiteit.
 
-Voor presentaties of alleen de UI: gebruik de **demo** die op GitHub Pages draait (zie DEPLOYMENT_GUIDE). Geen login, vaste demo-data.
+---
 
-## Projectstructuur
+## Voor wie?
 
-```
-├── server.js              # Express API, Supabase, auth-middleware
-├── login.html             # Inloggen/registreren (Supabase Auth)
-├── index-production.html   # Hoofdpagina app
-├── app.js                 # Frontend (token in Authorization-header)
-├── styles.css
-├── supabase/
-│   └── migrations/        # Database-schema (tenants + tenant_id)
-├── vercel.json            # Vercel-routes
-├── package.json
-├── DEPLOYMENT_GUIDE.md    # Uitgebreide deploy-instructies
-└── README.md
-```
+Dit systeem is bedoeld voor **Diëtist Noor** (of een andere diëtist/praktijk) die een overzichtelijke, digitale administratie wil: klanten, afspraken, inkomsten en uitgaven op één plek, met extra ondersteuning voor mutualiteit en terugbetaling.
 
-## Multi-tenant model
+---
 
-- **Tenant** = één ingelogde gebruiker (bijv. één diëtist of praktijk).
-- **Client (klant)** = een cliënt van die tenant; hoort bij die tenant.
-- Klanten, afspraken, uitgaven en instellingen zijn per tenant geïsoleerd.
-
-## Beveiliging
-
-- Authenticatie via Supabase Auth (e-mail/wachtwoord).
-- API vereist Bearer-token; tenant wordt uit het token bepaald.
-- PDF’s in Supabase Storage; download alleen via signed URL na autorisatie.
-
-## Licentie
-
-MIT. Ontwikkeld voor diëtistenpraktijken.
+**Gebouwd door [Studio Thielman](https://studiothielman.com)**
