@@ -55,7 +55,7 @@ export default function LoginPage() {
           marginBottom: '1rem',
           textAlign: 'center'
         }}>
-          Diëtist Laura
+          Diëtist Noor
         </h1>
         <p style={{
           color: '#718096',

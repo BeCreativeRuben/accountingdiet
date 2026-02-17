@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'Diëtist Laura - Boekhoudsysteem',
+  title: 'Diëtist Noor - Boekhoudsysteem',
   description: 'Web-based accounting system for sports dietitian Laura',
 };
 

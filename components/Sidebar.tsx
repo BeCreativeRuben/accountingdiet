@@ -26,7 +26,7 @@ export default function Sidebar() {
     <nav className="sidebar">
       <div className="sidebar-header">
         <h2>
-          <i className="fas fa-chart-line"></i> Diëtist Laura
+          <i className="fas fa-chart-line"></i> Diëtist Noor
         </h2>
       </div>
       <ul className="nav-menu">

@@ -661,7 +661,7 @@ module.exports = app;
 
 if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
     app.listen(PORT, () => {
-        console.log(`Diëtist Laura server running on port ${PORT}`);
+        console.log(`Diëtist Noor server running on port ${PORT}`);
     }).on('error', (err) => {
         if (err.code === 'EADDRINUSE') {
             console.error(`\n❌ Port ${PORT} is already in use.`);
