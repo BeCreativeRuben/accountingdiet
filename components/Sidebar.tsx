@@ -47,9 +47,9 @@ export default function Sidebar() {
       </ul>
       <div className="sidebar-account">
         <div className="account-info">
-          <div className="account-avatar">L</div>
+          <div className="account-avatar">N</div>
           <div className="account-details">
-            <div className="account-name">Laura</div>
+            <div className="account-name">Noor</div>
             <div className="account-role">Diëtist</div>
           </div>
         </div>

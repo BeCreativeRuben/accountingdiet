@@ -30,7 +30,7 @@ export default function Header({ title }: HeaderProps) {
       <div className="header-right">
         <div className="user-info">
           <i className="fas fa-user-circle"></i>
-          <span>Laura</span>
+          <span>Noor</span>
           <button
             className="btn btn-sm btn-secondary"
             onClick={handleLogout}
