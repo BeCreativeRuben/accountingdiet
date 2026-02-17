@@ -9,9 +9,9 @@ export async function GET(request: NextRequest) {
     return auth.response!;
   }
 
-  const rows = store.getUitgaven();
-  const result: Uitgave[] = rows.map((u) => {
-    const categorie = u.categorie_id ? store.getCategorieById(u.categorie_id)?.categorie ?? null : null;
+  const rows = await store.getUitgaven();
+  const result: Uitgave[] = await Promise.all(rows.map(async (u) => {
+    const categorie = u.categorie_id ? (await store.getCategorieById(u.categorie_id))?.categorie ?? null : null;
     return {
       id: u.id,
       datum: u.datum,
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       maand: u.maand,
       categorie
     };
-  });
+  }));
   return NextResponse.json(result);
 }
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     d.setDate(1);
     const maand = d.toISOString().split('T')[0];
 
-    const row = store.insertUitgave({
+    const row = await store.insertUitgave({
       datum,
       beschrijving,
       categorie_id: categorie_id ? Number(categorie_id) : null,

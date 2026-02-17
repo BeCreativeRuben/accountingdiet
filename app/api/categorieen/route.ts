@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     return auth.response!;
   }
 
-  const data = store.getCategorieen().sort((a, b) => a.categorie.localeCompare(b.categorie));
+  const data = (await store.getCategorieen()).sort((a, b) => a.categorie.localeCompare(b.categorie));
   return NextResponse.json(data);
 }
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { categorie } = body;
 
-    const row = store.insertCategorie({ categorie });
+    const row = await store.insertCategorie({ categorie });
     return NextResponse.json(row);
   } catch (error: any) {
     return NextResponse.json(

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     return auth.response!;
   }
 
-  const rows = store.getKlanten();
+  const rows = await store.getKlanten();
   const result: Klant[] = rows.map((k) => ({
     ...k,
     mutualiteit_naam: k.mutualiteit_id ? getMutualiteitNaam(k.mutualiteit_id) : null,
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { voornaam, achternaam, email, telefoon, startdatum, mutualiteit_id, solidaris_uitzondering } = body;
 
-    const row = store.insertKlant({
+    const row = await store.insertKlant({
       voornaam,
       achternaam,
       email: email || null,

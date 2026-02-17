@@ -33,7 +33,13 @@ async function apiRequest(
     throw new Error(error.error || `HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
+  const text = await response.text();
+  if (!text) return undefined;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
 }
 
 export async function apiGet(endpoint: string) {

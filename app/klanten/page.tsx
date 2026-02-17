@@ -42,15 +42,16 @@ export default function KlantenPage() {
   };
 
   const handleDelete = async (id: number) => {
+    if (id == null || id === undefined) return;
     if (!confirm('Weet je zeker dat je deze klant wilt verwijderen?')) {
       return;
     }
 
     try {
       await apiDelete(`/klanten/${id}`);
-      setKlanten(klanten.filter(k => k.id !== id));
+      setKlanten((prev) => prev.filter((k) => k.id !== id));
     } catch (error: any) {
-      alert('Er is een fout opgetreden bij het verwijderen: ' + error.message);
+      alert('Er is een fout opgetreden bij het verwijderen: ' + (error?.message ?? 'Onbekende fout'));
     }
   };
 
@@ -130,8 +131,13 @@ export default function KlantenPage() {
                         <i className="fas fa-edit"></i>
                       </button>
                       <button
+                        type="button"
                         className="btn btn-sm btn-danger"
-                        onClick={() => handleDelete(klant.id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDelete(klant.id);
+                        }}
                         title="Verwijderen"
                         style={{ marginLeft: '0.5rem' }}
                       >

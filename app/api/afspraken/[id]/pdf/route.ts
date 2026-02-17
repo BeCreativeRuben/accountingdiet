@@ -13,7 +13,7 @@ export async function GET(
 
   const { id } = await params;
   const idNum = Number(id);
-  const afspraak = store.getAfspraakById(idNum);
+  const afspraak = await store.getAfspraakById(idNum);
 
   if (!afspraak) {
     return NextResponse.json(
@@ -29,7 +29,7 @@ export async function GET(
     );
   }
 
-  const base64 = store.getAfspraakPdf(idNum);
+  const base64 = await store.getAfspraakPdf(idNum);
   if (!base64) {
     return NextResponse.json(
       { error: 'PDF not found' },

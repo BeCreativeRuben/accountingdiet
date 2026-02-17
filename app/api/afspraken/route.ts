@@ -9,10 +9,10 @@ export async function GET(request: NextRequest) {
     return auth.response!;
   }
 
-  const rows = store.getAfspraken();
-  const result: Afspraak[] = rows.map((a) => {
-    const klant = store.getKlantById(a.klant_id);
-    const consulttype = store.getConsulttypeById(a.type_id);
+  const rows = await store.getAfspraken();
+  const result: Afspraak[] = await Promise.all(rows.map(async (a) => {
+    const klant = await store.getKlantById(a.klant_id);
+    const consulttype = await store.getConsulttypeById(a.type_id);
     return {
       id: a.id,
       datum: a.datum,
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       type: consulttype?.type,
       type_prijs: consulttype?.prijs ?? undefined
     };
-  });
+  }));
   return NextResponse.json(result);
 }
 
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const opmerking = formData.get('opmerking') as string | null;
     const pdfFile = formData.get('pdf') as File | null;
 
-    const typeRow = store.getConsulttypeById(Number(type_id));
+    const typeRow = await store.getConsulttypeById(Number(type_id));
     if (!typeRow) {
       return NextResponse.json({ error: 'Consulttype not found' }, { status: 400 });
     }
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       pdfBestand = 'stored'; // marker; actual PDF in pdfStore by id after insert
     }
 
-    const row = store.insertAfspraak({
+    const row = await store.insertAfspraak({
       datum,
       klant_id: Number(klant_id),
       type_id: Number(type_id),
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     if (pdfFile && pdfFile.size > 0) {
       const arrayBuffer = await pdfFile.arrayBuffer();
       const base64 = Buffer.from(arrayBuffer).toString('base64');
-      store.setAfspraakPdf(row.id, base64);
+      await store.setAfspraakPdf(row.id, base64);
     }
 
     return NextResponse.json({

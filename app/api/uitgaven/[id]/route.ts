@@ -29,7 +29,7 @@ export async function PUT(
       updates.maand = d.toISOString().split('T')[0];
     }
 
-    const updated = store.updateUitgave(Number(id), updates);
+    const updated = await store.updateUitgave(Number(id), updates);
     if (!updated) {
       return NextResponse.json({ error: 'Uitgave not found' }, { status: 404 });
     }
@@ -53,7 +53,7 @@ export async function DELETE(
 
   try {
     const { id } = await params;
-    const ok = store.deleteUitgave(Number(id));
+    const ok = await store.deleteUitgave(Number(id));
     if (!ok) {
       return NextResponse.json({ error: 'Uitgave not found' }, { status: 404 });
     }

@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     return auth.response!;
   }
 
-  const data = store.getConsulttypes().sort((a, b) => a.type.localeCompare(b.type));
+  const data = (await store.getConsulttypes()).sort((a, b) => a.type.localeCompare(b.type));
   return NextResponse.json(data);
 }
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, prijs } = body;
 
-    const row = store.insertConsulttype({
+    const row = await store.insertConsulttype({
       type,
       prijs: prijs != null ? Number(prijs) : null
     });

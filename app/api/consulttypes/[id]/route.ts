@@ -16,7 +16,7 @@ export async function PUT(
     const body = await request.json();
     const { type, prijs } = body;
 
-    const updated = store.updateConsulttype(Number(id), {
+    const updated = await store.updateConsulttype(Number(id), {
       type,
       prijs: prijs != null ? Number(prijs) : null
     });
@@ -43,7 +43,7 @@ export async function DELETE(
 
   try {
     const { id } = await params;
-    const ok = store.deleteConsulttype(Number(id));
+    const ok = await store.deleteConsulttype(Number(id));
     if (!ok) {
       return NextResponse.json({ error: 'Consulttype not found' }, { status: 404 });
     }

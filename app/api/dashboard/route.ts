@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
   currentMonth.setDate(1);
   const currentMonthStr = currentMonth.toISOString().split('T')[0];
 
-  const afspraken = store.getAfspraken().filter((a) => a.maand === currentMonthStr);
-  const uitgavenList = store.getUitgaven().filter((u) => u.maand === currentMonthStr);
+  const afspraken = (await store.getAfspraken()).filter((a) => a.maand === currentMonthStr);
+  const uitgavenList = (await store.getUitgaven()).filter((u) => u.maand === currentMonthStr);
 
   const inkomsten = afspraken.reduce((s, r) => s + Number(r.totaal || 0), 0);
   const uitgaven = uitgavenList.reduce((s, r) => s + Number(r.bedrag || 0), 0);

@@ -16,7 +16,7 @@ export async function PUT(
     const body = await request.json();
     const { categorie } = body;
 
-    const updated = store.updateCategorie(Number(id), { categorie });
+    const updated = await store.updateCategorie(Number(id), { categorie });
     if (!updated) {
       return NextResponse.json({ error: 'Categorie not found' }, { status: 404 });
     }
@@ -40,7 +40,7 @@ export async function DELETE(
 
   try {
     const { id } = await params;
-    const ok = store.deleteCategorie(Number(id));
+    const ok = await store.deleteCategorie(Number(id));
     if (!ok) {
       return NextResponse.json({ error: 'Categorie not found' }, { status: 404 });
     }

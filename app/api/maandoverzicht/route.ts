@@ -13,10 +13,10 @@ export async function GET(request: NextRequest) {
   const yearStart = `${year}-01-01`;
   const yearEnd = `${year}-12-31`;
 
-  const afspraken = store.getAfspraken().filter(
+  const afspraken = (await store.getAfspraken()).filter(
     (a) => a.maand && a.maand >= yearStart && a.maand <= yearEnd
   );
-  const uitgavenList = store.getUitgaven().filter(
+  const uitgavenList = (await store.getUitgaven()).filter(
     (u) => u.maand && u.maand >= yearStart && u.maand <= yearEnd
   );
 

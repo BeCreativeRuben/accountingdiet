@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const yearStart = `${currentYear}-01-01`;
   const yearEnd = `${currentYear + 1}-01-01`;
 
-  const klanten = store.getKlanten();
+  const klanten = await store.getKlanten();
   if (!klanten.length) {
     return NextResponse.json([]);
   }
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
   });
 
-  const afspraken = store.getAfspraken().filter(
+  const afspraken = (await store.getAfspraken()).filter(
     (a) => a.terugbetaalbaar && a.datum >= yearStart && a.datum < yearEnd
   );
   const countByKlant: Record<number, number> = {};
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     if (mutNaam.includes('christelijk') || mutNaam === 'cm') {
       if (sessies >= 4) melding = 'Tegemoetkoming van 40 EUR';
-    } else if (mutNaam.includes('liberaal') || mutNaam === 'lm') {
+    } else if (mutNaam.includes('liberaal') || mutNaam.includes('liberale') || mutNaam.includes('(lm)')) {
       const max = 6;
       if (sessies > 0 && sessies <= max) {
         resterend = max - sessies;

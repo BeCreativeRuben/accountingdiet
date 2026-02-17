@@ -38,7 +38,7 @@ export async function PUT(
     if (opmerking !== undefined) updates.opmerking = opmerking;
 
     if (type_id != null) {
-      const typeRow = store.getConsulttypeById(Number(type_id));
+      const typeRow = await store.getConsulttypeById(Number(type_id));
       const prijs = typeRow?.prijs ?? 0;
       updates.prijs = prijs;
       updates.totaal = prijs * (Number(aantal) || 1);
@@ -47,11 +47,11 @@ export async function PUT(
     if (pdfFile && pdfFile.size > 0) {
       const arrayBuffer = await pdfFile.arrayBuffer();
       const base64 = Buffer.from(arrayBuffer).toString('base64');
-      store.setAfspraakPdf(idNum, base64);
+      await store.setAfspraakPdf(idNum, base64);
       updates.pdf_bestand = 'stored';
     }
 
-    const updated = store.updateAfspraak(idNum, updates);
+    const updated = await store.updateAfspraak(idNum, updates);
     if (!updated) {
       return NextResponse.json({ error: 'Afspraak not found' }, { status: 404 });
     }
@@ -75,7 +75,7 @@ export async function DELETE(
 
   try {
     const { id } = await params;
-    const ok = store.deleteAfspraak(Number(id));
+    const ok = await store.deleteAfspraak(Number(id));
     if (!ok) {
       return NextResponse.json({ error: 'Afspraak not found' }, { status: 404 });
     }

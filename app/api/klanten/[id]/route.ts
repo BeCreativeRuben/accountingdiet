@@ -29,7 +29,7 @@ export async function PUT(
       updates.solidaris_uitzondering = solidaris_uitzondering === true || solidaris_uitzondering === 'true';
     }
 
-    const updated = store.updateKlant(Number(id), updates);
+    const updated = await store.updateKlant(Number(id), updates);
     if (!updated) {
       return NextResponse.json({ error: 'Klant not found' }, { status: 404 });
     }
@@ -44,7 +44,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   const auth = authenticateToken(request);
   if (!auth.authenticated) {
@@ -52,8 +52,16 @@ export async function DELETE(
   }
 
   try {
-    const { id } = await params;
-    const ok = store.deleteKlant(Number(id));
+    const params = await context.params;
+    const idParam = params?.id;
+    if (idParam == null || idParam === '') {
+      return NextResponse.json({ error: 'Missing klant id' }, { status: 400 });
+    }
+    const id = Number(idParam);
+    if (Number.isNaN(id)) {
+      return NextResponse.json({ error: 'Invalid klant id' }, { status: 400 });
+    }
+    const ok = await store.deleteKlant(id);
     if (!ok) {
       return NextResponse.json({ error: 'Klant not found' }, { status: 404 });
     }
