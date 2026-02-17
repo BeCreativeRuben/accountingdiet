@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SECRET_TOKEN } from './supabase';
+import { SECRET_TOKEN } from './config';
 
 export function authenticateToken(request: NextRequest): { authenticated: boolean; response?: NextResponse } {
   const authHeader = request.headers.get('authorization');

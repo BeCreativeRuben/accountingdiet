@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SECRET_TOKEN } from '@/lib/supabase';
+import { SECRET_TOKEN } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,29 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateToken } from '@/lib/auth';
-import { supabase } from '@/lib/supabase';
+import * as store from '@/lib/store';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = authenticateToken(request);
   if (!auth.authenticated) {
     return auth.response!;
   }
 
-  if (!supabase) {
-    return NextResponse.json(
-      { error: 'Database not configured' },
-      { status: 503 }
-    );
-  }
-
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { voornaam, achternaam, email, telefoon, startdatum, mutualiteit_id, solidaris_uitzondering } = body;
 
-    const updates: any = {
+    const updates: Partial<{ voornaam: string; achternaam: string; email: string | null; telefoon: string | null; startdatum: string | null; mutualiteit_id: number | null; solidaris_uitzondering: boolean }> = {
       voornaam,
       achternaam,
       email: email || null,
@@ -36,18 +29,10 @@ export async function PUT(
       updates.solidaris_uitzondering = solidaris_uitzondering === true || solidaris_uitzondering === 'true';
     }
 
-    const { error } = await supabase
-      .from('klanten')
-      .update(updates)
-      .eq('id', id);
-
-    if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+    const updated = store.updateKlant(Number(id), updates);
+    if (!updated) {
+      return NextResponse.json({ error: 'Klant not found' }, { status: 404 });
     }
-
     return NextResponse.json({ message: 'Klant updated successfully' });
   } catch (error: any) {
     return NextResponse.json(
@@ -59,34 +44,19 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = authenticateToken(request);
   if (!auth.authenticated) {
     return auth.response!;
   }
 
-  if (!supabase) {
-    return NextResponse.json(
-      { error: 'Database not configured' },
-      { status: 503 }
-    );
-  }
-
   try {
-    const { id } = params;
-    const { error } = await supabase
-      .from('klanten')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+    const { id } = await params;
+    const ok = store.deleteKlant(Number(id));
+    if (!ok) {
+      return NextResponse.json({ error: 'Klant not found' }, { status: 404 });
     }
-
     return NextResponse.json({ message: 'Klant deleted successfully' });
   } catch (error: any) {
     return NextResponse.json(

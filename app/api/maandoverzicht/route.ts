@@ -1,0 +1,51 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { authenticateToken } from '@/lib/auth';
+import * as store from '@/lib/store';
+import { Maandoverzicht } from '@/types';
+
+export async function GET(request: NextRequest) {
+  const auth = authenticateToken(request);
+  if (!auth.authenticated) {
+    return auth.response!;
+  }
+
+  const year = new Date().getFullYear();
+  const yearStart = `${year}-01-01`;
+  const yearEnd = `${year}-12-31`;
+
+  const afspraken = store.getAfspraken().filter(
+    (a) => a.maand && a.maand >= yearStart && a.maand <= yearEnd
+  );
+  const uitgavenList = store.getUitgaven().filter(
+    (u) => u.maand && u.maand >= yearStart && u.maand <= yearEnd
+  );
+
+  const byMonth: Record<string, { inkomsten: number; uitgaven: number }> = {};
+  for (let i = 1; i <= 12; i++) {
+    const m = i.toString().padStart(2, '0');
+    byMonth[m] = { inkomsten: 0, uitgaven: 0 };
+  }
+
+  afspraken.forEach((a) => {
+    const m = a.maand ? String(a.maand).slice(5, 7) : null;
+    if (m && byMonth[m]) {
+      byMonth[m].inkomsten += Number(a.totaal || 0);
+    }
+  });
+
+  uitgavenList.forEach((u) => {
+    const m = u.maand ? String(u.maand).slice(5, 7) : null;
+    if (m && byMonth[m]) {
+      byMonth[m].uitgaven += Number(u.bedrag || 0);
+    }
+  });
+
+  const monthlyData: Maandoverzicht[] = Object.entries(byMonth).map(([maand, v]) => ({
+    maand,
+    inkomsten: v.inkomsten,
+    uitgaven: v.uitgaven,
+    netto: v.inkomsten - v.uitgaven
+  }));
+
+  return NextResponse.json(monthlyData);
+}
