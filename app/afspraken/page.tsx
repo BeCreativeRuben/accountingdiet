@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import AfspraakModal from '@/components/AfspraakModal';
@@ -22,6 +22,17 @@ export default function AfsprakenPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAfspraak, setSelectedAfspraak] = useState<Afspraak | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredAfspraken = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return afspraken;
+    return afspraken.filter((a) => {
+      const naam = `${(a.voornaam ?? '').toLowerCase()} ${(a.achternaam ?? '').toLowerCase()}`.trim();
+      const naamOmgekeerd = `${(a.achternaam ?? '').toLowerCase()} ${(a.voornaam ?? '').toLowerCase()}`.trim();
+      return naam.includes(q) || naamOmgekeerd.includes(q) || (a.voornaam?.toLowerCase() ?? '').includes(q) || (a.achternaam?.toLowerCase() ?? '').includes(q);
+    });
+  }, [afspraken, searchQuery]);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -103,6 +114,31 @@ export default function AfsprakenPage() {
           </div>
         </div>
 
+        <div className="search-bar-wrap">
+          <label className="search-label" htmlFor="afspraak-zoek">
+            <i className="fas fa-search"></i>
+          </label>
+          <input
+            id="afspraak-zoek"
+            type="search"
+            className="search-input"
+            placeholder="Zoek op klantnaam..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Afspraken zoeken op klant"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="search-clear"
+              onClick={() => setSearchQuery('')}
+              aria-label="Zoekopdracht wissen"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          )}
+        </div>
+
         <div className="table-container">
           <table className="data-table">
             <thead>
@@ -125,8 +161,15 @@ export default function AfsprakenPage() {
                     <p>Voeg uw eerste afspraak toe om te beginnen</p>
                   </td>
                 </tr>
+              ) : filteredAfspraken.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="empty-state">
+                    <i className="fas fa-search"></i>
+                    <p>Geen afspraken gevonden voor &quot;{searchQuery}&quot;</p>
+                  </td>
+                </tr>
               ) : (
-                afspraken.map((afspraak) => (
+                filteredAfspraken.map((afspraak) => (
                   <tr key={afspraak.id}>
                     <td>{formatDatum(afspraak.datum)}</td>
                     <td>{afspraak.voornaam} {afspraak.achternaam}</td>
