@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { apiGet } from '@/lib/api';
@@ -10,6 +10,21 @@ export default function TerugbetalingPage() {
   const router = useRouter();
   const [signalen, setSignalen] = useState<TerugbetalingSignaal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredSignalen = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return signalen;
+    return signalen.filter(
+      (s) =>
+        (s.voornaam?.toLowerCase() ?? '').includes(q) ||
+        (s.achternaam?.toLowerCase() ?? '').includes(q) ||
+        `${(s.voornaam ?? '').toLowerCase()} ${(s.achternaam ?? '').toLowerCase()}`.trim().includes(q) ||
+        `${(s.achternaam ?? '').toLowerCase()} ${(s.voornaam ?? '').toLowerCase()}`.trim().includes(q) ||
+        (s.mutualiteit_naam?.toLowerCase() ?? '').includes(q) ||
+        (s.melding?.toLowerCase() ?? '').includes(q)
+    );
+  }, [signalen, searchQuery]);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -64,6 +79,31 @@ export default function TerugbetalingPage() {
           </div>
         </div>
 
+        <div className="search-bar-wrap">
+          <label className="search-label" htmlFor="terugbetaling-zoek">
+            <i className="fas fa-search"></i>
+          </label>
+          <input
+            id="terugbetaling-zoek"
+            type="search"
+            className="search-input"
+            placeholder="Zoek op klantnaam, mutualiteit of melding..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Terugbetaling signalen zoeken"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="search-clear"
+              onClick={() => setSearchQuery('')}
+              aria-label="Zoekopdracht wissen"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          )}
+        </div>
+
         <div className="table-container">
           <table className="data-table">
             <thead>
@@ -83,9 +123,16 @@ export default function TerugbetalingPage() {
                     <p>Alle klanten zitten binnen hun limieten</p>
                   </td>
                 </tr>
+              ) : filteredSignalen.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="empty-state">
+                    <i className="fas fa-search"></i>
+                    <p>Geen signalen gevonden voor &quot;{searchQuery}&quot;</p>
+                  </td>
+                </tr>
               ) : (
-                signalen.map((signaal, index) => (
-                  <tr key={index}>
+                filteredSignalen.map((signaal) => (
+                  <tr key={signaal.klant_id}>
                     <td>{signaal.voornaam} {signaal.achternaam}</td>
                     <td>{signaal.mutualiteit_naam}</td>
                     <td>{signaal.sessies_terugbetaalbaar}</td>
