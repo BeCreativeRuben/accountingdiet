@@ -153,6 +153,7 @@ export default function UitgaveModal({
             <option value="Bankoverschrijving">Bankoverschrijving</option>
             <option value="Bancontact">Bancontact</option>
             <option value="Creditcard">Creditcard</option>
+            <option value="Domiciliëring">Domiciliëring</option>
           </select>
         </div>
         <div className="form-actions">

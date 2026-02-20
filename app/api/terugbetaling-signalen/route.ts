@@ -11,8 +11,16 @@ export async function GET(request: NextRequest) {
   }
 
   const currentYear = new Date().getFullYear();
-  const yearStart = `${currentYear}-01-01`;
-  const yearEnd = `${currentYear + 1}-01-01`;
+  const currentYM = `${currentYear}`;
+
+  /** Bepaal of datum in het huidige jaar valt (ook bij andere datumformaten). */
+  const inCurrentYear = (dateStr: string | null): boolean => {
+    if (!dateStr) return false;
+    const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
+    if (iso) return iso[1] === currentYM;
+    const d = new Date(dateStr);
+    return !Number.isNaN(d.getTime()) && d.getFullYear() === currentYear;
+  };
 
   const klanten = await store.getKlanten();
   if (!klanten.length) {
@@ -28,7 +36,7 @@ export async function GET(request: NextRequest) {
   });
 
   const afspraken = (await store.getAfspraken()).filter(
-    (a) => a.terugbetaalbaar && a.datum >= yearStart && a.datum < yearEnd
+    (a) => a.terugbetaalbaar && (inCurrentYear(a.datum) || inCurrentYear(a.maand))
   );
   const countByKlant: Record<number, number> = {};
   afspraken.forEach((a) => {
@@ -47,8 +55,13 @@ export async function GET(request: NextRequest) {
     let melding: string | null = null;
     let resterend: number | null = null;
 
-    if (mutNaam.includes('christelijk') || mutNaam === 'cm') {
-      if (sessies >= 4) melding = 'Tegemoetkoming van 40 EUR';
+    if (mutNaam.includes('christelijk') || mutNaam.includes('(cm)') || mutNaam === 'cm') {
+      if (sessies >= 4) {
+        melding = 'Tegemoetkoming van 40 EUR';
+      } else if (sessies > 0) {
+        const nog = 4 - sessies;
+        melding = `Nog ${nog} sessie${nog === 1 ? '' : 's'} nodig voor tegemoetkoming van 40 EUR (vanaf 4 per jaar).`;
+      }
     } else if (mutNaam.includes('liberaal') || mutNaam.includes('liberale') || mutNaam.includes('(lm)')) {
       const max = 6;
       if (sessies > 0 && sessies <= max) {
