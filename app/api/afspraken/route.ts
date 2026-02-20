@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
     const prijs = typeRow.prijs ?? 0;
     const totaal = prijs * (Number(aantal) || 1);
     const d = new Date(datum);
-    d.setDate(1);
-    const maand = d.toISOString().split('T')[0];
+    const datumISO = Number.isNaN(d.getTime()) ? datum : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const maand = Number.isNaN(d.getTime()) ? null : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
 
     let pdfBestand: string | null = null;
     if (pdfFile && pdfFile.size > 0) {
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     const row = await store.insertAfspraak({
-      datum,
+      datum: datumISO,
       klant_id: Number(klant_id),
       type_id: Number(type_id),
       aantal: Number(aantal) || 1,

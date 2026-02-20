@@ -355,6 +355,40 @@ body {
 .chart-actions {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
+}
+
+.year-select-wrap {
+    display: inline-flex;
+    align-items: center;
+}
+
+.year-select {
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #2D3748;
+    background: #fff;
+    cursor: pointer;
+}
+
+.year-select:hover,
+.year-select:focus {
+    border-color: #718096;
+    outline: none;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .page-actions {

@@ -26,10 +26,13 @@ export async function PUT(
     const updates: Partial<{ datum: string; klant_id: number; type_id: number; aantal: number; prijs: number; totaal: number; terugbetaalbaar: boolean; opmerking: string | null; maand: string | null; pdf_bestand: string | null }> = {};
 
     if (datum) {
-      updates.datum = datum;
       const d = new Date(datum);
-      d.setDate(1);
-      updates.maand = d.toISOString().split('T')[0];
+      if (!Number.isNaN(d.getTime())) {
+        updates.datum = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        updates.maand = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+      } else {
+        updates.datum = datum;
+      }
     }
     if (klant_id != null) updates.klant_id = Number(klant_id);
     if (type_id != null) updates.type_id = Number(type_id);

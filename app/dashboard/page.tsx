@@ -21,11 +21,15 @@ const MAAND_LABELS: Record<string, string> = {
   '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Okt', '11': 'Nov', '12': 'Dec',
 };
 
+const currentYear = new Date().getFullYear();
+const JAAR_OPTS = [currentYear, currentYear - 1, currentYear - 2];
+
 export default function DashboardPage() {
   const router = useRouter();
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [maandoverzicht, setMaandoverzicht] = useState<Maandoverzicht[]>([]);
   const [loading, setLoading] = useState(true);
+  const [jaar, setJaar] = useState(currentYear);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -37,11 +41,17 @@ export default function DashboardPage() {
     loadData();
   }, [router]);
 
+  useEffect(() => {
+    if (!jaar) return;
+    loadMaandoverzicht(jaar);
+  }, [jaar]);
+
   const loadData = async () => {
     try {
+      setLoading(true);
       const [dashboardData, maandoverzichtData] = await Promise.all([
         apiGet('/dashboard').catch(() => ({ inkomsten: 0, uitgaven: 0, netto: 0 })),
-        apiGet('/maandoverzicht').catch(() => [])
+        apiGet(`/maandoverzicht?jaar=${jaar}`).catch(() => [])
       ]);
 
       setDashboard(dashboardData);
@@ -50,6 +60,15 @@ export default function DashboardPage() {
       console.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMaandoverzicht = async (jaarNum: number) => {
+    try {
+      const data = await apiGet(`/maandoverzicht?jaar=${jaarNum}`).catch(() => []);
+      setMaandoverzicht(data);
+    } catch {
+      setMaandoverzicht([]);
     }
   };
 
@@ -114,8 +133,21 @@ export default function DashboardPage() {
 
         <div className="chart-container">
           <div className="chart-header">
-            <h2>Maandoverzicht {new Date().getFullYear()}</h2>
+            <h2>Maandoverzicht</h2>
             <div className="chart-actions">
+              <label className="year-select-wrap">
+                <span className="sr-only">Jaar</span>
+                <select
+                  className="year-select"
+                  value={jaar}
+                  onChange={(e) => setJaar(Number(e.target.value))}
+                  aria-label="Jaar"
+                >
+                  {JAAR_OPTS.map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </label>
               <button
                 className="btn btn-sm btn-secondary"
                 onClick={loadData}
@@ -163,7 +195,7 @@ export default function DashboardPage() {
                 ) : (
                   maandoverzicht.map((item) => (
                     <tr key={item.maand}>
-                      <td>{item.maand}</td>
+                      <td>{MAAND_LABELS[item.maand] || item.maand}</td>
                       <td>€{item.inkomsten.toFixed(2)}</td>
                       <td>€{item.uitgaven.toFixed(2)}</td>
                       <td>€{item.netto.toFixed(2)}</td>

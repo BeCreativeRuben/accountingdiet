@@ -7,6 +7,15 @@ import AfspraakModal from '@/components/AfspraakModal';
 import { apiGet, apiDelete } from '@/lib/api';
 import { Afspraak } from '@/types';
 
+/** Format ISO date (YYYY-MM-DD) to Dutch d-m-y; avoids wrong year when parsing with Date. */
+function formatDatum(datum: string): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(datum)) {
+    const [y, m, d] = datum.split('-');
+    return `${parseInt(d, 10)}-${parseInt(m, 10)}-${y}`;
+  }
+  return new Date(datum).toLocaleDateString('nl-NL');
+}
+
 export default function AfsprakenPage() {
   const router = useRouter();
   const [afspraken, setAfspraken] = useState<Afspraak[]>([]);
@@ -119,7 +128,7 @@ export default function AfsprakenPage() {
               ) : (
                 afspraken.map((afspraak) => (
                   <tr key={afspraak.id}>
-                    <td>{new Date(afspraak.datum).toLocaleDateString('nl-NL')}</td>
+                    <td>{formatDatum(afspraak.datum)}</td>
                     <td>{afspraak.voornaam} {afspraak.achternaam}</td>
                     <td>{afspraak.type || '-'}</td>
                     <td>{afspraak.aantal}</td>

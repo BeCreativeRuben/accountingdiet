@@ -25,8 +25,7 @@ export async function PUT(
     if (datum) {
       updates.datum = datum;
       const d = new Date(datum);
-      d.setDate(1);
-      updates.maand = d.toISOString().split('T')[0];
+      updates.maand = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
     }
 
     const updated = await store.updateUitgave(Number(id), updates);

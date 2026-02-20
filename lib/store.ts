@@ -66,6 +66,37 @@ const DEFAULT_CONSULTTYPES: Omit<StoreConsulttype, 'id'>[] = [
   { type: 'Online: korte opvolgconsultatie (0:15)', prijs: 25 },
 ];
 
+/** Normalize date from DB (Date or string or date-like object) to ISO YYYY-MM-DD so we never get "Mon Jan 05" from Date.toString().slice(0,10). */
+function toISODateString(val: unknown): string | null {
+  if (val == null) return null;
+  if (typeof val === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+    const d = new Date(val);
+    if (!Number.isNaN(d.getTime())) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    return null;
+  }
+  if (val instanceof Date && !Number.isNaN(val.getTime())) {
+    return `${val.getFullYear()}-${String(val.getMonth() + 1).padStart(2, '0')}-${String(val.getDate()).padStart(2, '0')}`;
+  }
+  if (typeof val === 'object' && val !== null) {
+    const o = val as Record<string, unknown>;
+    if (typeof o.getTime === 'function') {
+      const d = new Date((o.getTime as () => number)());
+      if (!Number.isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    const y = typeof o.year === 'number' ? o.year : typeof o.getFullYear === 'function' ? (o.getFullYear as () => number)() : null;
+    const mo = typeof o.month === 'number' ? o.month : typeof o.getMonth === 'function' ? (o.getMonth as () => number)() : null;
+    const day = typeof o.day === 'number' ? o.day : typeof o.getDate === 'function' ? (o.getDate as () => number)() : null;
+    if (y != null && mo != null && day != null) {
+      const month = typeof mo === 'number' && mo >= 0 && mo <= 11 ? mo + 1 : typeof mo === 'number' && mo >= 1 && mo <= 12 ? mo : null;
+      if (month != null) return `${y}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+  }
+  return null;
+}
+
 const mem = {
   klanten: [] as StoreKlant[],
   afspraken: [] as StoreAfspraak[],
@@ -96,7 +127,7 @@ export async function getKlanten(): Promise<StoreKlant[]> {
       achternaam: r.achternaam,
       email: r.email ?? null,
       telefoon: r.telefoon ?? null,
-      startdatum: r.startdatum ? String(r.startdatum).slice(0, 10) : null,
+      startdatum: toISODateString(r.startdatum) ?? (r.startdatum ? String(r.startdatum).slice(0, 10) : null),
       mutualiteit_id: r.mutualiteit_id != null ? Number(r.mutualiteit_id) : null,
       solidaris_uitzondering: Boolean(r.solidaris_uitzondering),
     }));
@@ -117,7 +148,7 @@ export async function getKlantById(id: number): Promise<StoreKlant | undefined> 
       achternaam: r.achternaam,
       email: r.email ?? null,
       telefoon: r.telefoon ?? null,
-      startdatum: r.startdatum ? String(r.startdatum).slice(0, 10) : null,
+      startdatum: toISODateString(r.startdatum) ?? (r.startdatum ? String(r.startdatum).slice(0, 10) : null),
       mutualiteit_id: r.mutualiteit_id != null ? Number(r.mutualiteit_id) : null,
       solidaris_uitzondering: Boolean(r.solidaris_uitzondering),
     };
@@ -138,7 +169,7 @@ export async function insertKlant(row: Omit<StoreKlant, 'id'>): Promise<StoreKla
       achternaam: inserted.achternaam,
       email: inserted.email ?? null,
       telefoon: inserted.telefoon ?? null,
-      startdatum: inserted.startdatum ? String(inserted.startdatum).slice(0, 10) : null,
+      startdatum: toISODateString(inserted.startdatum) ?? (inserted.startdatum ? String(inserted.startdatum).slice(0, 10) : null),
       mutualiteit_id: inserted.mutualiteit_id != null ? Number(inserted.mutualiteit_id) : null,
       solidaris_uitzondering: Boolean(inserted.solidaris_uitzondering),
     };
@@ -180,9 +211,15 @@ export async function deleteKlant(id: number): Promise<boolean> {
 
 // ----- Afspraken -----
 function rowToAfspraak(r: any): StoreAfspraak {
+  let datum = toISODateString(r.datum);
+  if (datum == null && r.datum != null) {
+    const d = new Date(r.datum);
+    if (!Number.isNaN(d.getTime())) datum = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  const maand = toISODateString(r.maand);
   return {
     id: Number(r.id),
-    datum: String(r.datum).slice(0, 10),
+    datum: datum ?? String(r.datum ?? '').slice(0, 10),
     klant_id: Number(r.klant_id),
     type_id: Number(r.type_id),
     aantal: Number(r.aantal),
@@ -190,7 +227,7 @@ function rowToAfspraak(r: any): StoreAfspraak {
     totaal: Number(r.totaal),
     terugbetaalbaar: Boolean(r.terugbetaalbaar),
     opmerking: r.opmerking ?? null,
-    maand: r.maand ? String(r.maand).slice(0, 10) : null,
+    maand,
     pdf_bestand: r.pdf_bestand ?? null,
   };
 }
@@ -281,14 +318,16 @@ export async function getAfspraakPdf(afspraakId: number): Promise<string | undef
 
 // ----- Uitgaven -----
 function rowToUitgave(r: any): StoreUitgave {
+  const datum = toISODateString(r.datum);
+  const maand = toISODateString(r.maand);
   return {
     id: Number(r.id),
-    datum: String(r.datum).slice(0, 10),
+    datum: datum ?? String(r.datum).slice(0, 10),
     beschrijving: r.beschrijving,
     categorie_id: r.categorie_id != null ? Number(r.categorie_id) : null,
     bedrag: Number(r.bedrag),
     betaalmethode: r.betaalmethode ?? null,
-    maand: r.maand ? String(r.maand).slice(0, 10) : null,
+    maand,
   };
 }
 

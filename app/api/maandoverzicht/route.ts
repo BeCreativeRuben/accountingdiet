@@ -9,9 +9,12 @@ export async function GET(request: NextRequest) {
     return auth.response!;
   }
 
-  const year = new Date().getFullYear();
-  const yearStart = `${year}-01-01`;
-  const yearEnd = `${year}-12-31`;
+  const { searchParams } = new URL(request.url);
+  const jaarParam = searchParams.get('jaar');
+  const year = jaarParam ? Math.max(2000, Math.min(2100, Number(jaarParam))) : new Date().getFullYear();
+  const yearNum = Number.isNaN(year) ? new Date().getFullYear() : year;
+  const yearStart = `${yearNum}-01-01`;
+  const yearEnd = `${yearNum}-12-31`;
 
   const afspraken = (await store.getAfspraken()).filter(
     (a) => a.maand && a.maand >= yearStart && a.maand <= yearEnd
@@ -26,6 +29,7 @@ export async function GET(request: NextRequest) {
     byMonth[m] = { inkomsten: 0, uitgaven: 0 };
   }
 
+  // Alle afspraken (ook terugbetaalbare) tellen als inkomsten.
   afspraken.forEach((a) => {
     const m = a.maand ? String(a.maand).slice(5, 7) : null;
     if (m && byMonth[m]) {

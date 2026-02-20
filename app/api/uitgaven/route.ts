@@ -37,8 +37,7 @@ export async function POST(request: NextRequest) {
     const { datum, beschrijving, categorie_id, bedrag, betaalmethode } = body;
 
     const d = new Date(datum);
-    d.setDate(1);
-    const maand = d.toISOString().split('T')[0];
+    const maand = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
 
     const row = await store.insertUitgave({
       datum,
