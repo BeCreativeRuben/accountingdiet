@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { useSidebar } from '@/lib/SidebarContext';
 
 interface NavItem {
@@ -19,10 +21,14 @@ const navItems: NavItem[] = [
   { page: 'instellingen', icon: 'fas fa-cog', label: 'Instellingen' },
 ];
 
+const avatarSize = 40;
+
 export default function Sidebar() {
   const pathname = usePathname();
   const currentPage = pathname?.split('/')[1] || 'dashboard';
   const { sidebarOpen, setSidebarOpen } = useSidebar();
+  const [avatarError, setAvatarError] = useState(false);
+  const [avatarLoaded, setAvatarLoaded] = useState(false);
 
   return (
     <>
@@ -58,7 +64,37 @@ export default function Sidebar() {
       </ul>
       <div className="sidebar-account">
         <div className="account-info">
-          <div className="account-avatar">N</div>
+          <span
+            className="account-avatar header-avatar-wrap"
+            style={{ position: 'relative', display: 'inline-flex', width: avatarSize, height: avatarSize, flexShrink: 0 }}
+          >
+            {!avatarLoaded && !avatarError && (
+              <i className="fas fa-user-circle" style={{ position: 'absolute', inset: 0, fontSize: avatarSize, color: '#cbd5e0', lineHeight: 1 }} aria-hidden />
+            )}
+            {avatarError ? (
+              <i className="fas fa-user-circle" style={{ fontSize: avatarSize, color: '#cbd5e0', lineHeight: 1 }} />
+            ) : (
+              <Image
+                src="/profile.webp"
+                alt="Noor"
+                width={avatarSize}
+                height={avatarSize}
+                unoptimized
+                onLoad={() => setAvatarLoaded(true)}
+                onError={() => setAvatarError(true)}
+                style={{
+                  width: avatarSize,
+                  height: avatarSize,
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  position: 'relative',
+                  zIndex: 1,
+                  opacity: avatarLoaded ? 1 : 0,
+                }}
+                className="header-avatar"
+              />
+            )}
+          </span>
           <div className="account-details">
             <div className="account-name">Noor</div>
             <div className="account-role">Diëtist</div>
