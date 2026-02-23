@@ -514,3 +514,35 @@ export async function deleteCategorie(id: number): Promise<boolean> {
   mem.categorieen.splice(idx, 1);
   return true;
 }
+
+// ----- Terugbetaling geïnformeerd (klant op de hoogte) -----
+const memTerugbetalingGeinformeerd = new Set<string>(); // "klant_id-jaar"
+
+export async function getTerugbetalingGeinformeerdKlantIds(jaar: number): Promise<Set<number>> {
+  if (hasDatabase()) {
+    const sql = getDb();
+    const rows = await sql`SELECT klant_id FROM terugbetaling_geinformeerd WHERE jaar = ${jaar}`;
+    return new Set((rows as { klant_id: number }[]).map((r) => r.klant_id));
+  }
+  const out = new Set<number>();
+  memTerugbetalingGeinformeerd.forEach((key) => {
+    const [kId, y] = key.split('-');
+    if (Number(y) === jaar) out.add(Number(kId));
+  });
+  return out;
+}
+
+export async function setTerugbetalingGeinformeerd(klant_id: number, jaar: number, geinformeerd: boolean): Promise<void> {
+  if (hasDatabase()) {
+    const sql = getDb();
+    if (geinformeerd) {
+      await sql`INSERT INTO terugbetaling_geinformeerd (klant_id, jaar) VALUES (${klant_id}, ${jaar}) ON CONFLICT (klant_id, jaar) DO NOTHING`;
+    } else {
+      await sql`DELETE FROM terugbetaling_geinformeerd WHERE klant_id = ${klant_id} AND jaar = ${jaar}`;
+    }
+    return;
+  }
+  const key = `${klant_id}-${jaar}`;
+  if (geinformeerd) memTerugbetalingGeinformeerd.add(key);
+  else memTerugbetalingGeinformeerd.delete(key);
+}

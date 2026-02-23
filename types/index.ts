@@ -81,4 +81,6 @@ export interface TerugbetalingSignaal {
   sessies_terugbetaalbaar: number;
   melding: string;
   resterend?: number | null;
+  /** Klant op de hoogte gesteld door de diëtist (dit jaar) */
+  klant_geinformeerd?: boolean;
 }

@@ -844,3 +844,20 @@ form {
 .empty-state p {
     font-size: 0.875rem;
 }
+
+.geinformeerd-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.geinformeerd-check input {
+    cursor: pointer;
+}
+
+.geinformeerd-label {
+    user-select: none;
+}

@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
-import { apiGet } from '@/lib/api';
+import { apiGet, apiPost } from '@/lib/api';
 import { TerugbetalingSignaal } from '@/types';
 
 export default function TerugbetalingPage() {
@@ -44,6 +44,18 @@ export default function TerugbetalingPage() {
       console.error('Error loading terugbetaling signalen:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const setGeinformeerd = async (klant_id: number, geinformeerd: boolean) => {
+    try {
+      await apiPost('/terugbetaling-signalen/geinformeerd', { klant_id, geinformeerd });
+      setSignalen((prev) =>
+        prev.map((s) => (s.klant_id === klant_id ? { ...s, klant_geinformeerd: geinformeerd } : s))
+      );
+    } catch (error) {
+      console.error('Fout bij bijwerken op de hoogte:', error);
+      alert('Kon status niet opslaan. Probeer opnieuw.');
     }
   };
 
@@ -112,12 +124,13 @@ export default function TerugbetalingPage() {
                 <th>Mutualiteit</th>
                 <th>Sessies Terugbetaalbaar</th>
                 <th>Melding</th>
+                <th title="Klant op de hoogte gesteld">Op de hoogte</th>
               </tr>
             </thead>
             <tbody>
               {signalen.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="empty-state">
+                  <td colSpan={5} className="empty-state">
                     <i className="fas fa-check-circle"></i>
                     <h3>Geen terugbetaling signalen</h3>
                     <p>Alle klanten zitten binnen hun limieten</p>
@@ -125,7 +138,7 @@ export default function TerugbetalingPage() {
                 </tr>
               ) : filteredSignalen.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="empty-state">
+                  <td colSpan={5} className="empty-state">
                     <i className="fas fa-search"></i>
                     <p>Geen signalen gevonden voor &quot;{searchQuery}&quot;</p>
                   </td>
@@ -137,6 +150,18 @@ export default function TerugbetalingPage() {
                     <td>{signaal.mutualiteit_naam}</td>
                     <td>{signaal.sessies_terugbetaalbaar}</td>
                     <td>{signaal.melding}</td>
+                    <td>
+                      <label className="geinformeerd-check">
+                        <input
+                          type="checkbox"
+                          checked={!!signaal.klant_geinformeerd}
+                          onChange={(e) => setGeinformeerd(signaal.klant_id, e.target.checked)}
+                          title="Klant op de hoogte gesteld"
+                          aria-label={`${signaal.voornaam} ${signaal.achternaam} op de hoogte`}
+                        />
+                        <span className="geinformeerd-label">Ja</span>
+                      </label>
+                    </td>
                   </tr>
                 ))
               )}

@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
     countByKlant[a.klant_id] = (countByKlant[a.klant_id] || 0) + 1;
   });
 
+  const geinformeerdSet = await store.getTerugbetalingGeinformeerdKlantIds(currentYear);
   const out: TerugbetalingSignaal[] = [];
 
   for (const k of klanten) {
@@ -93,7 +94,8 @@ export async function GET(request: NextRequest) {
         mutualiteit_naam: mut.naam,
         sessies_terugbetaalbaar: sessies,
         melding,
-        resterend
+        resterend,
+        klant_geinformeerd: geinformeerdSet.has(k.id)
       });
     }
   }
